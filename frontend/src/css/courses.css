@@ -1,0 +1,22 @@
+
+.manual-course-card-class {
+    min-height: 500px;
+}
+
+@media screen and (max-width: 1210px) {
+    .manual-course-card-class {
+        min-height: 550px;
+    }
+}
+
+@media screen and (max-width: 770px) {
+    .manual-course-card-class {
+        min-height: 500px;
+    }
+}
+
+@media screen and (max-width: 575px) {
+    .manual-course-card-class {
+        min-height: 400px;
+    }
+}
