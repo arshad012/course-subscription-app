@@ -31,7 +31,7 @@ export const subscribeCourse = async (req, res) => {
             (c) => c._id.toString() === course._id.toString()
         );
 
-        if(alreadySubscribed) {
+        if (alreadySubscribed) {
             return res.status(409).json({
                 success: false,
                 message: "You have already subscribed to this course"
@@ -61,8 +61,26 @@ export const getAllSubscribedCourses = async (req, res) => {
     // const userId = req.userId;
     // console.log('userId:', userId);
     try {
-        const { userId } = req.query;
-        const user = await User.findById(userId).populate("subscriptions")
+        const { userId, courseType } = req.query;
+        let match = {};
+        let user;
+
+        switch (courseType) {
+            case "All":
+                user = await User.findById(userId).populate("subscriptions");
+                break;
+            case "Free":
+            case "Paid":
+                if (courseType === "Free") match.isFree = true;
+                else if (courseType === "Paid") match.isFree = false;
+
+                user = await User.findById(userId).populate({
+                    path: "subscriptions",
+                    match
+                });
+                break;
+        }
+
         if (!user) {
             return res.status(400).json({
                 success: false,
@@ -88,13 +106,13 @@ export const unsubscribeCourse = async (req, res) => {
     // console.log('userId:', userId);
     try {
         const { userId, courseId } = req.query;
-        if(!userId) {
+        if (!userId) {
             return res.status(400).json({
                 success: false,
                 message: "user id is required to unsubcribe this course"
             })
         };
-        if(!courseId) {
+        if (!courseId) {
             return res.status(400).json({
                 success: false,
                 message: "course id is required to unsubcribe this course"
@@ -102,7 +120,7 @@ export const unsubscribeCourse = async (req, res) => {
         };
 
         const user = await User.findById(userId).populate("subscriptions");
-        if(!user) {
+        if (!user) {
             return res.status(400).json({
                 success: false,
                 message: "Failed to fetch user, please try again"

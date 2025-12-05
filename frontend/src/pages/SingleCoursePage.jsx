@@ -117,7 +117,11 @@ export const SingleCoursePage = () => {
 
     return (
         <div className="container mt-5 mb-5">
-            <MyToast />
+            <MyToast 
+                heading="Promo code applied" 
+                body="Congratulations, you got 50% discount" 
+                className="position-fixed bottom-0 start-0"
+            />
             <MyModal modalRef={modalRef} message={pageDetails.modalMessage} />
 
             {/* Back Button */}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, replace } from "react-router-dom";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -15,8 +15,10 @@ export function UserLogin({ hideNavButtons }) {
         email: "",
         password: "",
     });
-    const [errors, setErrors] = useState({ password: "" });
+    const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
     const { user, token } = useSelector(authSelector);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -29,7 +31,7 @@ export function UserLogin({ hideNavButtons }) {
 
     useEffect(() => {
         if (token) {
-            navigate("/courses");
+            navigate("/courses", { replace: true });
         }
     }, [token]);
 
@@ -60,6 +62,7 @@ export function UserLogin({ hideNavButtons }) {
             return;
         }
 
+        setIsLoading(true);
         try {
             const response = await axios.post(`${BASE_URL}/auth/login`, formData);
             // console.log('response:', response.data);
@@ -72,20 +75,28 @@ export function UserLogin({ hideNavButtons }) {
             }))
 
         } catch (error) {
-            console.log('error:', error);
+            console.log('error:', error.response);
+            if (error.response.data.message == "User not found") {
+                setErrors({ email: error.response.data.message });
+            } else if (error.response.data.message == "Wrong password") {
+                setErrors({ password: error.response.data.message });
+            }
+        } finally {
+            setIsLoading(false);
         }
-    }
+    };
 
     return (
         <div className="d-flex justify-content-center align-items-start vh-100">
-            <div className="card shadow p-4 mt-5" style={{ width: "380px" }}>
-                <h3 className="text-center mb-4">Log-in your account</h3>
+            <div className="card shadow p-4 my-5" style={{ width: "380px" }}>
+                <h3 className="text-center">Log-in your account</h3>
+                <p className="text-center text-muted mb-4">Enter your credentials</p>
 
                 <form onSubmit={handleSubmit}>
                     {/* Email */}
-                    <div className="mb-3">
-                        <label className="form-label">Email Address <span className="text-danger">*</span></label>
+                    <div className="form-floating">
                         <input
+                            id="floatingEmail"
                             type="email"
                             className={`form-control ${errors?.email ? "is-invalid" : ""}`}
                             placeholder="Enter your email"
@@ -93,14 +104,16 @@ export function UserLogin({ hideNavButtons }) {
                             value={formData.email}
                             onChange={handleChange}
                         />
-                        <p className="invalid-feedback">{errors?.email}</p>
+                        <label className="form-label" htmlFor="floatingEmail">Email Address</label>
+                        {/* <p className="invalid-feedback">{errors?.email}</p> */}
                     </div>
+                    <p className="text-danger text-sm" style={{ fontSize: "14px" }}>{errors?.email}</p>
 
                     {/* Password */}
                     <div>
-                        <label className="form-label">Password <span className="text-danger">*</span></label>
-                        <div className="d-flex align-items-center gap-2">
+                        <div className="input-group form-floating">
                             <input
+                                id="floatingPassword"
                                 type={showPassword ? "text" : "password"}
                                 className={`form-control ${errors?.password ? "is-invalid" : ""}`}
                                 placeholder="Enter password"
@@ -108,19 +121,25 @@ export function UserLogin({ hideNavButtons }) {
                                 value={formData.password}
                                 onChange={handleChange}
                             />
+                            <label className="form-label" htmlFor="floatingPassword">Password</label>
                             {showPassword ? (
-                                <i class="bi bi-eye-slash" style={{cursor: "pointer"}} onClick={() => setShowPassword(prev => !prev)}></i>
+                                <i className="bi bi-eye-slash input-group-text" style={{ cursor: "pointer" }} onClick={() => setShowPassword(prev => !prev)}></i>
                             ) : (
-                                <i class="bi bi-eye" style={{cursor: "pointer"}} onClick={() => setShowPassword(prev => !prev)}></i>
+                                <i className="bi bi-eye input-group-text" style={{ cursor: "pointer" }} onClick={() => setShowPassword(prev => !prev)}></i>
                             )}
                         </div>
-                        {/* <p className="invalid-feedback">{errors?.password}</p> */}
                     </div>
-                    <p className="text-danger text-sm" style={{fontSize: "14px"}}>{errors?.password}</p>
+                    {/* <p className="invalid-feedback">{errors?.password}</p> */}
+                    <p className="text-danger text-sm" style={{ fontSize: "14px" }}>{errors?.password}</p>
 
                     {/* Button */}
-                    <button className="btn btn-primary w-100 mt-2">
-                        Log In
+                    <button className="btn btn-primary w-100 mt-2 d-flex gap-2 justify-content-center align-items-center" type="submit" disabled={isLoading}>
+                        {isLoading ? <>
+                            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span role="status">Plase wait...</span>
+                        </> :
+                            <span>Log In</span>
+                        }
                     </button>
                 </form>
 

@@ -34,7 +34,9 @@ export const SignupUser = async (req, res) => {
         console.log('error:', error);
         return res.status(500).json({
             success: false,
-            message: "Internal server error"
+            message: "Internal server error",
+            error: error.message,
+            errorName: error.name
         })
     }
 };

@@ -1,5 +1,6 @@
 import { Course } from "../models/course.js";
 
+// only admin can use it
 export const addCourse = async (req, res) => {
     // const userId = req.userId;
 
@@ -46,7 +47,18 @@ export const getAllCourses = async (req, res) => {
     // console.log('userId:', userId);
 
     try {
-        const courses = await Course.find();
+        const { courseType } = req.query;
+        let courses;
+        switch(courseType) {
+            case "All" : 
+                courses = await Course.find();
+                break;
+            case "Free" :
+            case "Paid" : 
+                courses = await Course.find({ isFree: courseType == "Free" });
+                break;
+        }
+
         return res.status(200).json({
             success: true,
             data: courses,
@@ -66,7 +78,7 @@ export const getCourse = async (req, res) => {
     try {
         const { courseId } = req.params;
         const course = await Course.findById(courseId);
-        if(!course) {
+        if (!course) {
             return res.status(400).json({
                 success: false,
                 message: "Course not found"
@@ -86,7 +98,7 @@ export const getCourse = async (req, res) => {
     }
 };
 
-
+// only admin can use it
 export const updateCourse = async (req, res) => {
     try {
         const { courseId, img } = req.body;

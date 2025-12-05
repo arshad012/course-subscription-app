@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { BASE_URL } from "../base_url";
 import { CourseCard } from "../components/courseCard";
@@ -10,15 +10,20 @@ import { useDispatch } from "react-redux";
 
 export function Courses() {
     const [courses, setCourses] = useState([]);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [courseType, setCourseType] = useState(searchParams.get("course-type") || "All");
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const token = localStorage.getItem(loginUserTokenKey);
 
     useEffect(() => {
-        async function fetchCourses() {
+        if (!searchParams.get("course-type")) {
+            setSearchParams({ "course-type": "All" });
+        }
+        async function fetchCourses(courseType) {
             try {
-                const response = await axios.get(`${BASE_URL}/api/courses`, {
+                const response = await axios.get(`${BASE_URL}/api/courses?courseType=${courseType}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -27,25 +32,40 @@ export function Courses() {
                 setCourses(response.data.data);
             } catch (error) {
                 console.log('error:', error.response.data);
-                if(error.response.data?.authenticationFailed) dispatch(logoutUser());
-
-                // let message = jwtErrorDecoder(error.response.data?.message);
-                // if(!message) {
-                //     message = "Unknown server error:" + error.response.data;
-                // }
+                if (error.response.data?.authenticationFailed) dispatch(logoutUser());
             }
         }
 
-        fetchCourses();
-    }, []);
+        fetchCourses(courseType);
+    }, [courseType]);
+
+    const handleChange = (e) => {
+        const value = e.target.value;
+        setCourseType(value);
+        setSearchParams({ "course-type": value });
+    }
 
     const handleCourseView = (id) => {
         navigate(`/courses/${id}`);
     }
 
+    const filterOptions = [
+        { value: "All", label: "All Courses" },
+        { value: "Paid", label: "Paid Courses" },
+        { value: "Free", label: "Free Courses" }
+    ];
+
+
     return (
         <div className="container-sm my-4">
-            <h2 className="mb-4 text-center fw-bold">Available Courses</h2>
+
+            <select className="form-select size-sm" aria-label="Default select example" style={{ width: "150px" }} onChange={handleChange}>
+                {filterOptions.map((opt, i) => (
+                    <option key={i} value={opt.value} selected={opt.value == courseType}>{opt.label}</option>
+                ))}
+            </select>
+
+            <h2 className="mb-4 mt-2 text-center fw-bold">Available Courses</h2>
             <div className="container mt-4">
                 <div className="row g-4">
                     {courses.map(course => (
