@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 import { loginUserInfoKey } from "../../localStorageKeys";
 import { logoutUser } from "../../redux/auth/authSlice";
 
 export function Navbar({ showLogoutBtn = true, showMyCourseBtn = true }) {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const userInfo = JSON.parse(localStorage.getItem(loginUserInfoKey));
 
     const handleLogout = () => {
