@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { loginUserInfoKey } from "../../localStorageKeys";
 import { logoutUser } from "../../redux/auth/authSlice";
 
-export function Navbar({ showNavButtons = true }) {
+export function Navbar({ showLogoutBtn = true, showMyCourseBtn = true }) {
+    // console.log('showMyCourseBtn:', showMyCourseBtn)
+    // console.log('showLogoutBtn:', showLogoutBtn)
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const userInfo = JSON.parse(localStorage.getItem(loginUserInfoKey));
@@ -24,10 +26,10 @@ export function Navbar({ showNavButtons = true }) {
                 style={{ cursor: "pointer" }}
             />
 
-            {showNavButtons && <div className="d-flex gap-2">
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate(`/user/${userInfo.id}/subscriptions`)}>My courses</button>
-                <button type="button" className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Logout</button>
-            </div>}
+            <div className="d-flex gap-2">
+                {showMyCourseBtn && <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate(`/user/${userInfo.id}/subscriptions`)}>My courses</button>}
+                {showLogoutBtn && <button type="button" className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Logout</button>}
+            </div>
         </nav>
     )
 };

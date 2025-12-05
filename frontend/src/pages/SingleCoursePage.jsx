@@ -9,8 +9,11 @@ import { MyToast } from "../components/toast";
 import { loginUserInfoKey, loginUserTokenKey } from "../localStorageKeys/index";
 import { MyModal } from "../components/modal";
 import { logoutUser } from "../redux/auth/authSlice";
+import { Footer } from "../components/Footer";
+import { Loading } from "../components/Loading";
 
 export const SingleCoursePage = () => {
+    const promo_code = "BFSALE25";
     const { courseId } = useParams();
     const [pageDetails, setPageDetails] = useState({
         course: {},
@@ -23,7 +26,8 @@ export const SingleCoursePage = () => {
         subscribeBtn: true,
         input: false
     });
-
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubscribing, setIsSubscribing] = useState(false)
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -38,9 +42,11 @@ export const SingleCoursePage = () => {
                 setPageDetails({ ...pageDetails, ["course"]: response.data.course });
             } catch (error) {
                 console.log('error:', error.response);
-                if(error.response.data?.authenticationFailed) dispatch(logoutUser());
+                if (error.response.data?.authenticationFailed) dispatch(logoutUser());
+            } finally {
+                setIsLoading(false);
             }
-        }
+        };
 
         fetchCourse(courseId);
     }, []);
@@ -49,6 +55,7 @@ export const SingleCoursePage = () => {
     const bootstrapModalRef = useRef(null);
 
     useEffect(() => {
+        if(isLoading) return;
         const modalEl = modalRef.current;
 
         // Create modal instance only ONCE
@@ -61,7 +68,7 @@ export const SingleCoursePage = () => {
         return () => {
             bootstrapModalRef.current.hide();
         };
-    }, []);
+    }, [isLoading]);
 
     const userInfo = JSON.parse(localStorage.getItem(loginUserInfoKey));
     const token = localStorage.getItem(loginUserTokenKey);
@@ -75,10 +82,10 @@ export const SingleCoursePage = () => {
     };
 
     const handleApplyPromocode = () => {
-        if (pageDetails.input === 'BFSALE25') {
+        if (pageDetails.input === promo_code) {
             setPageDetails({ ...pageDetails, ["promocodeError"]: "" })
             setDisabled({ ...disabled, ["applyBtn"]: true, ["input"]: true, ["subscribeBtn"]: false })
-            setPageDetails({ ...pageDetails, ["course"]: { ...pageDetails.course, ["price"]: pageDetails.course.price / 2 } });
+            setPageDetails({ ...pageDetails, ["course"]: { ...pageDetails.course, ["price"]: Math.floor(pageDetails.course.price / 2) } });
             showToast();
         } else {
             setPageDetails({ ...pageDetails, ["promocodeError"]: "Invalid promo code" })
@@ -86,11 +93,13 @@ export const SingleCoursePage = () => {
     };
 
     const handleSubscribe = async () => {
+        if (isSubscribing) return;
+        setIsSubscribing(true);
         try {
             const response = await axios.patch(`${BASE_URL}/api/subscribe`, {
                 userId: userInfo.id,
                 course: pageDetails.course
-            },{
+            }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -105,79 +114,90 @@ export const SingleCoursePage = () => {
             }, 5000);
 
         } catch (error) {
-            if(error.response.data?.authenticationFailed) {dispatch(logoutUser())}
+            if (error.response.data?.authenticationFailed) { dispatch(logoutUser()) }
             else {
                 console.log('error:', error.response.data);
                 setPageDetails({ ...pageDetails, ["modalMessage"]: error.response.data.message });
                 bootstrapModalRef.current.show();
-            } 
+            }
+        } finally {
+            setIsSubscribing(false);
         }
     };
 
 
-    return (
-        <div className="container mt-5 mb-5">
-            <MyToast 
-                heading="Promo code applied" 
-                body="Congratulations, you got 50% discount" 
-                className="position-fixed bottom-0 start-0"
-            />
-            <MyModal modalRef={modalRef} message={pageDetails.modalMessage} />
-
-            {/* Back Button */}
-            <button className="btn btn-primary mb-4 sm-btn-sm" onClick={() => navigate("/courses")}>
-                ← Back to Courses
-            </button>
-
-            <div className="card bg-dark text-white shadow-lg p-4">
-
-                {/* pageDetails.Course Image */}
-                <img
-                    src={pageDetails.course.image}
-                    alt={pageDetails.course.title}
-                    className="img-fluid rounded mb-4"
-                    style={{ height: "350px", width: "100%", objectFit: "cover" }}
+    return ( isLoading ? <Loading /> :
+        <div>
+            <div className="container mt-5 mb-5">
+                <MyToast
+                    heading="Promo code applied"
+                    body="Congratulations, you got 50% discount"
+                    className="position-fixed bottom-0 start-0"
                 />
+                <MyModal modalRef={modalRef} message={pageDetails.modalMessage} />
 
-                {/* Title & Description */}
-                <h2 className="mb-3">{pageDetails.course.title}</h2>
-
-                <p className="text-light-50 fs-5">{pageDetails.course.description}</p>
-
-                <hr className="border-secondary" />
-
-                {/* Price Section */}
-                <h4 className="mt-3">
-                    {pageDetails.course.isFree ? (
-                        <span className="badge bg-success fs-6">FREE</span>
-                    ) : (
-                        <span className="text-warning fw-bold">₹{pageDetails.course.price}</span>
-                    )}
-                </h4>
-
-                {!pageDetails.course?.isFree &&
-                    <div className="mb-3" style={{ maxWidth: "350px" }}>
-                        <label className="form-label">{disabled.subscribeBtn ? "Use Promo code \"BFSALE25\"" : "Promo code applied successfully"}</label>
-                        <div className="d-flex align-items-center gap-2">
-                            <input
-                                type="text"
-                                className={`form-control ${pageDetails.promocodeError ? "is-invalid" : ""}`}
-                                placeholder="Enter promo code"
-                                value={pageDetails.input}
-                                onChange={(e) => setPageDetails({ ...pageDetails, ["input"]: e.target.value, ["promocodeError"]: "" })}
-                                disabled={disabled.input}
-                            />
-                            <button disabled={disabled.applyBtn} type="button" className="btn btn-primary btn-sm text-nowrap" onClick={handleApplyPromocode}>Apply</button>
-                        </div>
-
-                        <p className="text-danger">{pageDetails.promocodeError}</p>
-                    </div>}
-
-                {/* Subscribe Button */}
-                <button disabled={disabled.subscribeBtn && !pageDetails?.course?.isFree} className="btn btn-primary btn-lg mt-4 w-100" onClick={handleSubscribe}>
-                    Subscribe Now
+                {/* Back Button */}
+                <button className="btn btn-primary mb-4 sm-btn-sm" onClick={() => navigate("/courses")}>
+                    ← Back to Courses
                 </button>
+
+                <div className="card bg-dark text-white shadow-lg p-4">
+
+                    {/* pageDetails.Course Image */}
+                    <img
+                        src={pageDetails.course.image}
+                        alt={pageDetails.course.title}
+                        className="img-fluid rounded mb-4"
+                        style={{ height: "350px", width: "100%", objectFit: "cover" }}
+                    />
+
+                    {/* Title & Description */}
+                    <h2 className="mb-3">{pageDetails.course.title}</h2>
+
+                    <p className="text-light-50 fs-5">{pageDetails.course.description}</p>
+
+                    <hr className="border-secondary" />
+
+                    {/* Price Section */}
+                    <h4 className="mt-3">
+                        {pageDetails.course.isFree ? (
+                            <span className="badge bg-success fs-6">FREE</span>
+                        ) : (
+                            <span className="text-warning fw-bold">₹{pageDetails.course.price}</span>
+                        )}
+                    </h4>
+
+                    {!pageDetails.course?.isFree &&
+                        <div className="mb-3" style={{ maxWidth: "350px" }}>
+                            <label className="form-label">{disabled.subscribeBtn ? `Use Promo code "${promo_code}"` : "Promo code applied successfully"}</label>
+                            <div className="d-flex align-items-center gap-2">
+                                <input
+                                    type="text"
+                                    className={`form-control ${pageDetails.promocodeError ? "is-invalid" : ""}`}
+                                    placeholder="Enter promo code"
+                                    value={pageDetails.input}
+                                    onChange={(e) => setPageDetails({ ...pageDetails, ["input"]: e.target.value, ["promocodeError"]: "" })}
+                                    disabled={disabled.input}
+                                />
+                                <button disabled={disabled.applyBtn} type="button" className="btn btn-primary btn-sm text-nowrap" onClick={handleApplyPromocode}>Apply</button>
+                            </div>
+
+                            <p className="text-danger">{pageDetails.promocodeError}</p>
+                        </div>}
+
+                    {/* Subscribe Button */}
+                    <button disabled={disabled.subscribeBtn && !pageDetails?.course?.isFree || isSubscribing} className="btn btn-primary btn-lg mt-4 w-100 d-flex gap-2 justify-content-center align-items-center" onClick={handleSubscribe}>
+                        {isSubscribing ? <>
+                            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span role="status">Plase wait...</span>
+                        </> :
+                            <span>Subscribe Now</span>
+                        }
+                    </button>
+                </div>
             </div>
+            
+            <Footer />
         </div>
     );
 };

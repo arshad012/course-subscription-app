@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, replace } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import { loginUserTokenKey, loginUserInfoKey } from "../localStorageKeys/index";
 import { authSelector } from "../redux/auth/selector";
 import { loginUser } from "../redux/auth/authSlice";
 
-export function UserLogin({ hideNavButtons }) {
+export function UserLogin({ handleNavButtons }) {
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -24,9 +24,9 @@ export function UserLogin({ hideNavButtons }) {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        hideNavButtons(false);
+        handleNavButtons({ showLogoutBtn: false, showMyCourseBtn: false });
 
-        return () => hideNavButtons(true);
+        return () => handleNavButtons({ showLogoutBtn: true, showMyCourseBtn: true });
     }, []);
 
     useEffect(() => {

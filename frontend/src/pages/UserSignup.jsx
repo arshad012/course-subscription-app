@@ -7,7 +7,7 @@ import { isEmailValid, isPasswordValid } from '../validator/index';
 import { BASE_URL } from "../base_url";
 import { MyToast } from "../components/toast";
 
-export function UserSignup({ hideNavButtons }) {
+export function UserSignup({ handleNavButtons }) {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -22,7 +22,11 @@ export function UserSignup({ hideNavButtons }) {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => hideNavButtons(false), []);
+    useEffect(() => {
+        handleNavButtons({ showLogoutBtn: false, showMyCourseBtn: false });
+
+        return () => handleNavButtons({ showLogoutBtn: true, showMyCourseBtn: true });
+    }, []);
 
     const validateInputFields = () => {
         const tempErrors = {};
@@ -86,9 +90,9 @@ export function UserSignup({ hideNavButtons }) {
 
     return (
         <div className="d-flex justify-content-center align-items-start vh-100">
-            <MyToast 
-                heading="Congratulations" 
-                body="Your account has been created." 
+            <MyToast
+                heading="Congratulations"
+                body="Your account has been created."
                 className="top-0 start-50 translate-middle-x"
             />
             <div className="card shadow p-4 my-5" style={{ width: "380px" }}>

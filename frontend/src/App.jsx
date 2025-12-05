@@ -15,18 +15,25 @@ import { AddCourse } from "./pages/AddCourse";
 import { NotFound } from "./pages/NotFound";
 
 function App() {
-  const [showNavButtons, setShowNavButtons] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState({
+    showLogoutBtn: true,
+    showMyCourseBtn: true
+  });
 
-  const hideNavButtons = (state) => setShowNavButtons(state);
+  const handleNavButtons = ({ showLogoutBtn = true, showMyCourseBtn = true }) => {
+    setShowNavButtons({ showLogoutBtn, showMyCourseBtn });
+    // This function can be used into any component on which page you need to hide "logout" and "my course" button,
+    // NOTE: use this function in useEffect and in clean up function set it to it's earliest state.
+  };
 
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <Navbar showNavButtons={showNavButtons} />
+        <Navbar showLogoutBtn={showNavButtons.showLogoutBtn} showMyCourseBtn={showNavButtons.showMyCourseBtn} />
 
         <Routes>
-          <Route path="/" element={<UserLogin  hideNavButtons={hideNavButtons} />} />
-          <Route path="/signup" element={<UserSignup hideNavButtons={hideNavButtons} />} />
+          <Route path="/" element={<UserLogin handleNavButtons={handleNavButtons} />} />
+          <Route path="/signup" element={<UserSignup handleNavButtons={handleNavButtons} />} />
           <Route path="/courses" element={
             <PrivateRoute>
               <Courses />
@@ -41,17 +48,17 @@ function App() {
 
           <Route path="/user/:userId/subscriptions" element={
             <PrivateRoute>
-              <MyCourses />
+              <MyCourses handleNavButtons={handleNavButtons} />
             </PrivateRoute>
           } />
-          
+
           <Route path="/add-course" element={
             <PrivateRoute>
               <AddCourse />
             </PrivateRoute>
           } />
 
-          <Route path="*" element={<NotFound /> } />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </Provider>
