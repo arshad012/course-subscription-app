@@ -48,25 +48,20 @@ export function UserLogin({ handleNavButtons }) {
     };
     
     const validateInputFieldsOnChange = (name, value) => {
-        const errors = {};
+        let error;
         value = value.trim();
 
         switch(name) {
             case "email" : 
                 if (!isEmailValid(value)) {
-                    errors.email = "Invalid email";
+                    error = "Invalid email";
                 }
                 break;
-            // case "password" :
-            //     if (!value) {
-            //         errors.password = "Please enter password";
-            //     }
-            //     break;
             default :
                 null;
         };
 
-        setErrors(errors);
+        setErrors(prev => ({...prev, [name]: error}));
     };
 
     const handleChange = e => {

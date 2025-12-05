@@ -142,7 +142,7 @@ export function MyCourses({ handleNavButtons }) {
                                             {course.description?.substring(0, 100)}...
                                         </p>
                                         <p className={`card-text ${course.isFree ? "badge bg-success text-white" : ""}`} style={{ width: "fit-content" }}>
-                                            {course.price > 0 ? `Price paid ₹${course.price / 2}` : "Free"}
+                                            {course.price > 0 ? `Price paid ₹${Math.floor(course.price / 2)}` : "Free"}
                                         </p>
                                         <p className="card-text text-muted">
                                             Subscribed on - {getTime(course.createdAt)}

@@ -24,7 +24,6 @@ export const addCourse = async (req, res) => {
                 message: "Image URL is required"
             });
         }
-
         const newCourse = new Course(req.body);
         await newCourse.save();
 

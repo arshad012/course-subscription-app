@@ -34,7 +34,7 @@ export function UserSignup({ handleNavButtons }) {
             tempErrors.email = "Invalid email";
         };
         if (!isPasswordValid(formData.password)) {
-            tempErrors.password = "Invalid password";
+            tempErrors.password = "Invalid password, password must have";
         };
         if (formData.password != formData.confirmPassword) {
             tempErrors.confirmPassword = "Password does not match";
@@ -44,29 +44,29 @@ export function UserSignup({ handleNavButtons }) {
     }
 
     const validateInputFieldsOnChange = (name, value) => {
-        const errors = {};
+        let error;
         value = value.trim();
 
         switch (name) {
             case "email":
                 if (!isEmailValid(value)) {
-                    errors.email = "Invalid email";
+                    error = "Invalid email";
                 }
                 break;
             case "password" :
                 if (!isPasswordValid(value)) {
-                    errors.password = "Invalid password";
+                    error = "Invalid password, password must have";
                 }
                 break;
             case "confirmPassword" :
-                if(formData.password != value) {
-                    error.password = "Password does not match";
+                if(!value) {
+                    error = "Password does not match";
                 }
             default:
                 null;
         };
 
-        setErrors(errors);
+        setErrors(prev => ({...prev, [name]: error}));
     };
 
     const handleChange = e => {
@@ -174,11 +174,14 @@ export function UserSignup({ handleNavButtons }) {
                         {/* <p className="invalid-feedback">{errors?.password}</p> */}
                     </div>
                     {errors.password &&
-                        <div>
+                        <>
                             <p className="text-danger text-sm m-0" style={{ fontSize: "14px" }}>{errors?.password}</p>
-                            <p className="text-danger text-sm m-0" style={{ fontSize: "14px" }}>Password should have atleast one digit, one capital and small letter</p>
-                            <p className="text-danger text-sm" style={{ fontSize: "14px" }}>Atleast one special character among @  #  $  %  &  *</p>
-                        </div>
+                            <ul style={{ paddingLeft: "10px"}}>
+                                <li className="text-muted text-sm m-0" style={{ fontSize: "14px" }}>Atleast one capital and small letter</li>
+                                <li className="text-muted text-sm m-0" style={{ fontSize: "14px" }}>Atleast one digit</li>
+                                <li className="text-muted text-sm" style={{ fontSize: "14px" }}>Atleast one special character @ # $ % & *</li>
+                            </ul>
+                        </>
                     }
 
                     {/* Confirm Password */}
