@@ -43,9 +43,36 @@ export function UserSignup({ handleNavButtons }) {
         return tempErrors;
     }
 
+    const validateInputFieldsOnChange = (name, value) => {
+        const errors = {};
+        value = value.trim();
+
+        switch (name) {
+            case "email":
+                if (!isEmailValid(value)) {
+                    errors.email = "Invalid email";
+                }
+                break;
+            case "password" :
+                if (!isPasswordValid(value)) {
+                    errors.password = "Invalid password";
+                }
+                break;
+            case "confirmPassword" :
+                if(formData.password != value) {
+                    error.password = "Password does not match";
+                }
+            default:
+                null;
+        };
+
+        setErrors(errors);
+    };
+
     const handleChange = e => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        validateInputFieldsOnChange(name, value);
     }
 
     const showToast = () => {
@@ -81,7 +108,7 @@ export function UserSignup({ handleNavButtons }) {
         } catch (error) {
             console.log('error:', error.response);
             if (error.response.data.error == 'duplicate id') {
-                setErrors({ email: "This id is already registered" });
+                setErrors({ email: "This ID is already registered" });
             }
         } finally {
             setIsLoading(false);

@@ -45,11 +45,34 @@ export function UserLogin({ handleNavButtons }) {
         }
 
         return tempErrors;
-    }
+    };
+    
+    const validateInputFieldsOnChange = (name, value) => {
+        const errors = {};
+        value = value.trim();
+
+        switch(name) {
+            case "email" : 
+                if (!isEmailValid(value)) {
+                    errors.email = "Invalid email";
+                }
+                break;
+            // case "password" :
+            //     if (!value) {
+            //         errors.password = "Please enter password";
+            //     }
+            //     break;
+            default :
+                null;
+        };
+
+        setErrors(errors);
+    };
 
     const handleChange = e => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        validateInputFieldsOnChange(name, value);
     }
 
     const handleSubmit = async (e) => {
