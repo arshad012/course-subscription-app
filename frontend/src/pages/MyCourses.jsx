@@ -167,7 +167,7 @@ export function MyCourses({ handleNavButtons }) {
                     )}
                 </div>
             </div>
-            <Footer />
+            {data?.subscriptions?.length > 0 && <Footer />}
         </div>
     )
 };

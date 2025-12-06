@@ -14,6 +14,7 @@ import { Loading } from "../components/Loading";
 
 export const SingleCoursePage = () => {
     const promo_code = "BFSALE25";
+    let timerRef = useRef(null);
     const { courseId } = useParams();
     const [pageDetails, setPageDetails] = useState({
         course: {},
@@ -67,6 +68,7 @@ export const SingleCoursePage = () => {
         // Cleanup when component unmounts
         return () => {
             bootstrapModalRef.current.hide();
+            clearTimeout(timerRef.current);
         };
     }, [isLoading]);
 
@@ -109,7 +111,7 @@ export const SingleCoursePage = () => {
             setPageDetails({ ...pageDetails, ["modalMessage"]: `You have successfully subscribed to ${pageDetails?.course?.title} course, please wait we will redirect you to your course pages` });
             bootstrapModalRef.current.show();
 
-            setTimeout(() => {
+            timerRef.current = setTimeout(() => {
                 navigate(`/user/${userInfo.id}/subscriptions`);
             }, 5000);
 
