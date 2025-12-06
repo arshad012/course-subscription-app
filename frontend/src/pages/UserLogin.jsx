@@ -128,8 +128,8 @@ export function UserLogin({ handleNavButtons }) {
                     <p className="text-danger text-sm" style={{ fontSize: "14px" }}>{errors?.email}</p>
 
                     {/* Password */}
-                    <div>
-                        <div className="input-group form-floating">
+                    <div className="d-flex">
+                        <div className="form-floating flex-grow-1">
                             <input
                                 id="floatingPassword"
                                 type={showPassword ? "text" : "password"}
@@ -138,14 +138,18 @@ export function UserLogin({ handleNavButtons }) {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
+                                style={{
+                                    borderTopRightRadius: 0,
+                                    borderBottomRightRadius: 0
+                                }}
                             />
                             <label className="form-label" htmlFor="floatingPassword">Password</label>
-                            {showPassword ? (
-                                <i className="bi bi-eye-slash input-group-text" style={{ cursor: "pointer" }} onClick={() => setShowPassword(prev => !prev)}></i>
-                            ) : (
-                                <i className="bi bi-eye input-group-text" style={{ cursor: "pointer" }} onClick={() => setShowPassword(prev => !prev)}></i>
-                            )}
                         </div>
+                        {showPassword ? (
+                            <i className="bi bi-eye-slash input-group-text" style={{ cursor: "pointer", borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }} onClick={() => setShowPassword(prev => !prev)}></i>
+                        ) : (
+                            <i className="bi bi-eye input-group-text" style={{ cursor: "pointer", borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }} onClick={() => setShowPassword(prev => !prev)}></i>
+                        )}
                     </div>
                     {/* <p className="invalid-feedback">{errors?.password}</p> */}
                     <p className="text-danger text-sm" style={{ fontSize: "14px" }}>{errors?.password}</p>
