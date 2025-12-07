@@ -23,6 +23,7 @@ export function UserSignup({ handleNavButtons }) {
     const navigate = useNavigate();
 
     useEffect(() => {
+        document.title = "SignUp"
         handleNavButtons({ showLogoutBtn: false, showMyCourseBtn: false });
 
         return () => handleNavButtons({ showLogoutBtn: true, showMyCourseBtn: true });

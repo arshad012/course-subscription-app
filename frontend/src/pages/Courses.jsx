@@ -21,6 +21,7 @@ export function Courses() {
     const token = localStorage.getItem(loginUserTokenKey);
 
     useEffect(() => {
+        document.title = "Courses"
         if (!searchParams.get("course-type")) {
             setSearchParams({ "course-type": "All" });
         }

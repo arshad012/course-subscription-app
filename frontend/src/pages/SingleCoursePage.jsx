@@ -32,6 +32,8 @@ export const SingleCoursePage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    document.title = pageDetails.course?.title ?? "Courses";
+    // useEffect for fetching single course details
     useEffect(() => {
         async function fetchCourse(id) {
             try {
@@ -50,11 +52,13 @@ export const SingleCoursePage = () => {
         };
 
         fetchCourse(courseId);
+        document.title = pageDetails.course?.title ?? "Course";
     }, []);
 
     const modalRef = useRef(null);
     const bootstrapModalRef = useRef(null);
 
+    // useEffect for setting up modal
     useEffect(() => {
         if(isLoading) return;
         const modalEl = modalRef.current;
@@ -96,6 +100,7 @@ export const SingleCoursePage = () => {
 
     const handleSubscribe = async () => {
         if (isSubscribing) return;
+        document.title = `Subscribing...`
         setIsSubscribing(true);
         try {
             const response = await axios.patch(`${BASE_URL}/api/subscribe`, {

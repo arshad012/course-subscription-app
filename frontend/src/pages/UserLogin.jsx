@@ -32,7 +32,9 @@ export function UserLogin({ handleNavButtons }) {
     useEffect(() => {
         if (token) {
             navigate("/courses", { replace: true });
-        }
+        } else {
+            document.title = "Login"
+        };
     }, [token]);
 
     const validateInputFields = () => {

@@ -31,6 +31,7 @@ export function MyCourses({ handleNavButtons }) {
         if (!searchParams.get("course-type")) {
             setSearchParams({ "course-type": "All" });
         }
+        document.title = `${courseType} courses`;
 
         async function fetchSubscribedCourses(courseType) {
             setIsLoading(true);
